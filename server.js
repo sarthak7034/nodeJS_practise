@@ -20,9 +20,16 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 app.use('/users', userRoutes);
 
 // 5. Start the Server (Only after DB connection)
-connectDB().then(() => {
+const { connectRedis } = require('./src/config/redis');
+
+async function startServer() {
+    await connectDB();
+    await connectRedis();
+    
     app.listen(PORT, () => {
         console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
         console.log(`📄 Swagger Docs available at http://localhost:${PORT}/api-docs`);
     });
-});
+}
+
+startServer();
