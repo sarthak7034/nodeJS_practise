@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const swaggerUI = require('swagger-ui-express');
 const { connectDB } = require('./src/config/db');
 const userRoutes = require('./src/routes/userRoutes');
+const analyticsRoutes = require('./src/routes/analyticsRoutes');
 const swaggerSpecs = require('./src/config/swagger');
 
 // 1. Initialize the Express Application
@@ -18,6 +19,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 
 // 4. API Routes
 app.use('/users', userRoutes);
+app.use('/analytics', analyticsRoutes);
 
 // 5. Start the Server (Only after DB connection)
 const { connectRedis } = require('./src/config/redis');

@@ -3,11 +3,12 @@
 - **Express Server**: Fast and minimalist web framework.
 - **MongoDB Integration**: Real database persistence using the official MongoDB driver.
 - **Redis Caching**: Lightning-fast response times with intelligent caching strategy.
+- **Advanced Aggregations**: Industry-standard MongoDB pipelines for business analytics.
 - **CRUD Operations**: Create, Read, Update, and Delete users.
 - **Pagination**: Efficient offset-based pagination for fetching large datasets.
 - **Swagger Documentation**: Interactive API docs at `/api-docs`.
 - **Logging**: Request logging using `morgan`.
-- **Auto-Seeding**: Automatically populates the database with mock data if empty.
+- **Auto-Seeding**: Populates database with realistic e-commerce data (users, products, orders).
 - **Modular Architecture**: Clean separation of concerns (routes, controllers, config).
 
 ## 🛠️ Tech Stack
@@ -67,6 +68,16 @@
 | `PUT` | `/users/:id` | Update a user | Body: `{ "role": "admin" }` |
 | `DELETE` | `/users/:id` | Delete a user | - |
 
+### Analytics (MongoDB Aggregation Pipelines)
+
+| Method | Endpoint | Description | Features |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/analytics/sales` | Daily sales for last 30 days | `$match`, `$group`, `$dateToString` |
+| `GET` | `/analytics/top-products` | Best-selling products | `$unwind`, `$lookup`, `$sort` |
+| `GET` | `/analytics/categories` | Revenue by category | `$lookup`, `$group`, category breakdown |
+| `GET` | `/analytics/user-patterns` | Customer lifetime value | `$addFields`, user spending analysis |
+| `GET` | `/analytics/monthly-revenue` | Monthly trends | `$year`, `$month`, time-based grouping |
+
 ## 📂 Project Structure
 
 ```
@@ -75,11 +86,14 @@
 │   ├── config/
 │   │   ├── db.js           # MongoDB connection
 │   │   ├── redis.js        # Redis connection
-│   │   └── swagger.js      # Swagger configuration
+│   │   ├── swagger.js      # Swagger configuration
+│   │   └── seedData.js     # Mock data generation
 │   ├── controllers/
-│   │   └── userController.js  # User business logic
+│   │   ├── userController.js      # User business logic
+│   │   └── analyticsController.js # Aggregation pipelines
 │   └── routes/
-│       └── userRoutes.js   # User API routes
+│       ├── userRoutes.js   # User API routes
+│       └── analyticsRoutes.js # Analytics endpoints
 ├── server.js               # Main application entry point
 ├── package.json            # Dependencies and scripts
 ├── .gitignore              # Ignored files
@@ -103,3 +117,12 @@
     - Implemented Redis for response caching.
     - Added cache invalidation on updates/deletes.
     - Improved response times by ~8x on cached requests.
+- **v1.4.0**: MongoDB Aggregation Pipelines
+    - Added realistic e-commerce data (100 products, 500 orders).
+    - Implemented 5 advanced aggregation endpoints:
+      - Daily sales analytics (`$match`, `$group`, `$dateToString`)
+      - Top products (`$unwind`, `$lookup`, `$sort`)
+      - Category revenue (`$lookup`, multi-collection joins)
+      - User purchase patterns (`$addFields`, customer LTV)
+      - Monthly trends (time-based aggregations)
+    - Industry-standard data modeling and query optimization.

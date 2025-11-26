@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const { seedDatabase } = require('./seedData');
 
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
@@ -11,19 +12,22 @@ async function connectDB() {
         console.log("✅ Connected to MongoDB!");
         db = client.db("taskManagerDB");
         
-        // Optional: Seed data
+        // Seed Users (if empty)
         const usersCollection = db.collection("users");
         const count = await usersCollection.countDocuments();
         if (count === 0) {
-            console.log("Seeding database with mock data...");
+            console.log("👥 Seeding users...");
             const mockUsers = Array.from({ length: 50 }, (_, i) => ({
                 name: `User ${i + 1}`,
                 email: `user${i + 1}@example.com`,
                 role: i % 3 === 0 ? 'admin' : 'user'
             }));
             await usersCollection.insertMany(mockUsers);
-            console.log("✅ Database seeded!");
+            console.log("✅ Users seeded!");
         }
+
+        // Seed Products and Orders
+        await seedDatabase(db);
 
         return db;
     } catch (error) {
