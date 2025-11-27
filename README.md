@@ -75,8 +75,10 @@
 | `GET` | `/analytics/sales` | Daily sales for last 30 days | `$match`, `$group`, `$dateToString` |
 | `GET` | `/analytics/top-products` | Best-selling products | `$unwind`, `$lookup`, `$sort` |
 | `GET` | `/analytics/categories` | Revenue by category | `$lookup`, `$group`, category breakdown |
-| `GET` | `/analytics/user-patterns` | Customer lifetime value | `$addFields`, user spending analysis |
+| `GET` | `/analytics/user-patterns` | Customer Lifetime Value | `$addFields`, user spending analysis |
 | `GET` | `/analytics/monthly-revenue` | Monthly trends | `$year`, `$month`, time-based grouping |
+| `GET` | `/analytics/heavy-task` | Trigger CPU-intensive task | **Bull Queue** + **Worker Threads** |
+| `GET` | `/analytics/task-status/:id` | Check background job status | Poll for async results |
 
 ## 📂 Project Structure
 
@@ -86,14 +88,17 @@
 │   ├── config/
 │   │   ├── db.js           # MongoDB connection
 │   │   ├── redis.js        # Redis connection
+│   │   ├── queue.js        # Bull Queue config
 │   │   ├── swagger.js      # Swagger configuration
 │   │   └── seedData.js     # Mock data generation
 │   ├── controllers/
 │   │   ├── userController.js      # User business logic
 │   │   └── analyticsController.js # Aggregation pipelines
-│   └── routes/
-│       ├── userRoutes.js   # User API routes
-│       └── analyticsRoutes.js # Analytics endpoints
+│   ├── routes/
+│   │   ├── userRoutes.js   # User API routes
+│   │   └── analyticsRoutes.js # Analytics endpoints
+│   └── workers/
+│       └── heavyTaskWorker.js # Worker thread script
 ├── server.js               # Main application entry point
 ├── package.json            # Dependencies and scripts
 ├── .gitignore              # Ignored files

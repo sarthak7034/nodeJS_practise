@@ -319,10 +319,62 @@ const getMonthlyRevenue = async (req, res) => {
     }
 };
 
+const { heavyTaskQueue } = require('../config/queue');
+
+// ... existing imports ...
+
+// 6. Heavy Computation (Queue + Worker Threads)
+const getHeavyComputation = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100000;
+        
+        // Add job to the queue
+        const job = await heavyTaskQueue.add({ limit });
+        
+        console.log(`[Main] Added job ${job.id} to queue`);
+
+        // Respond immediately (Async processing)
+        res.json({
+            message: "Task added to queue",
+            jobId: job.id,
+            statusUrl: `/analytics/task-status/${job.id}`
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 7. Check Task Status
+const getTaskStatus = async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const job = await heavyTaskQueue.getJob(jobId);
+
+        if (!job) {
+            return res.status(404).json({ error: "Job not found" });
+        }
+
+        const state = await job.getState();
+        const result = job.returnvalue;
+        const reason = job.failedReason;
+
+        res.json({
+            jobId,
+            state, // completed, failed, delayed, active, waiting
+            result,
+            error: reason
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getSalesAnalytics,
     getTopProducts,
     getCategoryAnalytics,
     getUserPurchasePatterns,
-    getMonthlyRevenue
+    getMonthlyRevenue,
+    getHeavyComputation,
+    getTaskStatus
 };

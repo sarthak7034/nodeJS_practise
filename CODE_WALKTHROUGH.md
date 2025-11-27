@@ -257,3 +257,94 @@ curl http://localhost:3000/analytics/top-products?limit=3
    - Config files handle connections
 
 This is how professional Node.js applications are structured! 🚀
+
+---
+
+# 🧵 Example 2: Async Job Queue Flow
+
+Let's trace the execution of a **heavy background task** using Bull Queue and Worker Threads.
+
+## 1️⃣ Trigger the Task
+
+```bash
+curl "http://localhost:3000/analytics/heavy-task?limit=500000"
+```
+
+### **src/controllers/analyticsController.js**
+
+```javascript
+// Line 325: Add job to queue
+const job = await heavyTaskQueue.add({ limit });
+
+// Line 330: Return immediately!
+res.json({
+    message: "Task added to queue",
+    jobId: job.id,
+    statusUrl: `/analytics/task-status/${job.id}`
+});
+```
+
+**What happens**: 
+- The request finishes in **~10ms**.
+- The user gets a `jobId` (e.g., "1").
+- The main server thread is **FREE** to handle other requests.
+
+---
+
+## 2️⃣ Background Processing (The "Invisible" Work)
+
+### **src/config/queue.js** (Queue Processor)
+
+```javascript
+// Line 9: Queue picks up the job
+heavyTaskQueue.process(async (job) => {
+    
+    // Line 18: Spawn a new Worker Thread
+    const worker = new Worker(workerPath, {
+        workerData: { limit: 500000 }
+    });
+    
+    // Line 22: Wait for worker result
+    worker.on('message', (result) => {
+        resolve(result.data); // Job marked as COMPLETED
+    });
+});
+```
+
+### **src/workers/heavyTaskWorker.js** (Worker Thread)
+
+```javascript
+// Line 25: Heavy Calculation (CPU Intensive)
+const result = calculatePrimes(500000);
+
+// Line 33: Send result back
+parentPort.postMessage({ status: 'success', data: result });
+```
+
+**What happens**: 
+- This runs in a **separate thread/process**.
+- It takes ~70-100ms (or longer for bigger numbers).
+- It does **NOT** block the main API.
+
+---
+
+## 3️⃣ Check Status (Polling)
+
+```bash
+curl "http://localhost:3000/analytics/task-status/1"
+```
+
+### **src/controllers/analyticsController.js**
+
+```javascript
+// Line 345: Get job status
+const job = await heavyTaskQueue.getJob(jobId);
+const state = await job.getState(); // 'completed'
+const result = job.returnvalue;     // { count: 41538, ... }
+
+res.json({ state, result });
+```
+
+**What happens**: 
+- If called immediately: Returns `state: "active"`.
+- If called after completion: Returns `state: "completed"` with the data.

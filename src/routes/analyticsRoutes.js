@@ -75,4 +75,41 @@ router.get('/user-patterns', analyticsController.getUserPurchasePatterns);
  */
 router.get('/monthly-revenue', analyticsController.getMonthlyRevenue);
 
+/**
+ * @swagger
+ * /analytics/heavy-task:
+ *   get:
+ *     summary: Perform CPU-intensive task using Worker Threads
+ *     tags: [Analytics]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Upper limit for prime calculation (default 100000)
+ *     responses:
+ *       200:
+ *         description: Computation result
+ */
+router.get('/heavy-task', analyticsController.getHeavyComputation);
+
+/**
+ * @swagger
+ * /analytics/task-status/{id}:
+ *   get:
+ *     summary: Check status of background job
+ *     tags: [Analytics]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Job ID returned from /heavy-task
+ *     responses:
+ *       200:
+ *         description: Job status and result
+ */
+router.get('/task-status/:id', analyticsController.getTaskStatus);
+
 module.exports = router;

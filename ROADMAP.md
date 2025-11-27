@@ -44,13 +44,3 @@ Since you already know React, you have a huge head start! You already understand
 - [ ] **Deployment**: Deploying to Render, Railway, or Vercel.
 
 ---
-
-## Recommended First Project: "Task Manager API"
-1.  **Setup**: Initialize `package.json`.
-2.  **Server**: Create a simple Express server.
-3.  **Database**: Connect MongoDB.
-4.  **Features**:
-    - Create a Task.
-    - Get all Tasks.
-    - Mark Task as completed.
-    - Delete a Task.
