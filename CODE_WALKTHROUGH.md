@@ -348,3 +348,57 @@ res.json({ state, result });
 **What happens**: 
 - If called immediately: Returns `state: "active"`.
 - If called after completion: Returns `state: "completed"` with the data.
+
+---
+
+# 🔐 Example 3: Authentication Flow
+
+## 1️⃣ Login Request
+
+```bash
+curl -X POST http://localhost:3000/auth/login -d '{"email":"user1@example.com", "password":"password123"}'
+```
+
+### **src/controllers/authController.js**
+
+```javascript
+// Line 76: Find user
+const user = await usersCollection.findOne({ email });
+
+// Line 82: Verify Password
+const isMatch = await bcrypt.compare(password, user.password);
+
+// Line 88: Generate Tokens
+const { accessToken, refreshToken } = generateTokens(user);
+
+// Line 93: Save Refresh Token (Rotation)
+await usersCollection.updateOne(
+    { _id: user._id },
+    { $push: { refreshTokens: refreshToken } }
+);
+
+// Line 98: Return Tokens
+res.json({ accessToken, refreshToken });
+```
+
+## 2️⃣ Access Protected Route
+
+```bash
+curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:3000/users
+```
+
+### **src/middleware/authMiddleware.js**
+
+```javascript
+// Line 6: Extract Token
+const token = authHeader.split(' ')[1];
+
+// Line 12: Verify Token
+jwt.verify(token, ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: "Invalid Token" });
+    
+    // Line 18: Attach user to request
+    req.user = user;
+    next(); // Proceed to controller
+});
+```

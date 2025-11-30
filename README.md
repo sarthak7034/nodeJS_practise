@@ -4,6 +4,7 @@
 - **MongoDB Integration**: Real database persistence using the official MongoDB driver.
 - **Redis Caching**: Lightning-fast response times with intelligent caching strategy.
 - **Advanced Aggregations**: Industry-standard MongoDB pipelines for business analytics.
+- **Secure Authentication**: JWT-based auth with Refresh Token Rotation & Reuse Detection.
 - **CRUD Operations**: Create, Read, Update, and Delete users.
 - **Pagination**: Efficient offset-based pagination for fetching large datasets.
 - **Swagger Documentation**: Interactive API docs at `/api-docs`.
@@ -58,15 +59,24 @@
 
 ## 📡 API Endpoints
 
+### Authentication (JWT + Refresh Token Rotation)
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/auth/register` | Register new user | No |
+| `POST` | `/auth/login` | Login & get tokens | No |
+| `POST` | `/auth/refresh` | Rotate Refresh Token | No |
+| `POST` | `/auth/logout` | Invalidate Refresh Token | No |
+
 ### Users
 
-| Method | Endpoint | Description | Example |
+| Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/users` | Get all users (Paginated) | `/users?page=1&limit=10` |
-| `GET` | `/users/:id` | Get a single user by ID | `/users/656...` |
-| `POST` | `/users` | Create a new user | Body: `{ "name": "John", "email": "john@test.com" }` |
-| `PUT` | `/users/:id` | Update a user | Body: `{ "role": "admin" }` |
-| `DELETE` | `/users/:id` | Delete a user | - |
+| `GET` | `/users` | Get all users (Paginated) | **Yes** |
+| `GET` | `/users/:id` | Get a single user by ID | **Yes** |
+| `POST` | `/users` | Create a new user (Admin) | **Yes (Admin)** |
+| `PUT` | `/users/:id` | Update a user | **Yes** |
+| `DELETE` | `/users/:id` | Delete a user (Admin) | **Yes (Admin)** |
 
 ### Analytics (MongoDB Aggregation Pipelines)
 
@@ -131,3 +141,16 @@
       - User purchase patterns (`$addFields`, customer LTV)
       - Monthly trends (time-based aggregations)
     - Industry-standard data modeling and query optimization.
+- **v1.5.0**: Multi-threading & Job Queue
+    - Implemented Worker Threads for CPU-intensive tasks (prime calculation).
+    - Integrated Bull (Redis-backed queue) for background job processing.
+    - Added job status tracking and result polling.
+    - Queue concurrency set to 2 for optimal performance.
+- **v1.6.0**: JWT Authentication & Authorization
+    - Implemented secure JWT-based authentication system.
+    - **Refresh Token Rotation**: Prevents stolen tokens from being reused.
+    - **Reuse Detection**: Invalidates all tokens if theft is suspected.
+    - Password hashing with `bcryptjs`.
+    - Role-based authorization (Admin vs User).
+    - Protected all user CRUD endpoints with authentication.
+    - Microservices-ready architecture.

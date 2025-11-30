@@ -17,7 +17,10 @@ app.use(express.json());
 // 3. Swagger Documentation Route
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 
+const authRoutes = require('./src/routes/authRoutes');
+
 // 4. API Routes
+app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/analytics', analyticsRoutes);
 

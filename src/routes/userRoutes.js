@@ -1,168 +1,137 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       required:
- *         - name
- *         - email
- *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the user
- *         name:
- *           type: string
- *           description: The name of the user
- *         email:
- *           type: string
- *           description: The email of the user
- *         role:
- *           type: string
- *           description: The role of the user
- *       example:
- *         name: John Doe
- *         email: john@example.com
- *         role: user
- */
+const { authenticateToken, authorizeRoles } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
  * tags:
  *   name: Users
- *   description: The users managing API
+ *   description: User management API
  */
 
 /**
  * @swagger
  * /users:
  *   get:
- *     summary: Returns the list of all the users
+ *     summary: Get all users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: The page number
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: The number of items per page
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: The list of the users
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
+ *         description: List of users
  */
-router.get('/', userController.getUsers);
+router.get('/', authenticateToken, userController.getUsers);
 
 /**
  * @swagger
  * /users/{id}:
  *   get:
- *     summary: Get the user by id
+ *     summary: Get user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The user id
  *     responses:
  *       200:
- *         description: The user description by id
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: The user was not found
+ *         description: User details
  */
-router.get('/:id', userController.getUserById);
+router.get('/:id', authenticateToken, userController.getUserById);
 
 /**
  * @swagger
  * /users:
  *   post:
- *     summary: Create a new user
+ *     summary: Create a new user (Admin only)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             required: [name, email]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       201:
- *         description: The user was successfully created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       500:
- *         description: Some server error
+ *         description: User created
  */
-router.post('/', userController.createUser);
+router.post('/', authenticateToken, authorizeRoles('admin'), userController.createUser);
 
 /**
  * @swagger
  * /users/{id}:
  *   put:
- *     summary: Update the user by the id
+ *     summary: Update a user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The user id
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
  *     responses:
  *       200:
- *         description: The user was updated
- *       404:
- *         description: The user was not found
- *       500:
- *         description: Some error happened
+ *         description: User updated
  */
-router.put('/:id', userController.updateUser);
+router.put('/:id', authenticateToken, userController.updateUser);
 
 /**
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Remove the user by id
+ *     summary: Delete a user (Admin only)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The user id
  *     responses:
  *       200:
- *         description: The user was deleted
- *       404:
- *         description: The user was not found
+ *         description: User deleted
  */
-router.delete('/:id', userController.deleteUser);
+router.delete('/:id', authenticateToken, authorizeRoles('admin'), userController.deleteUser);
 
 module.exports = router;
