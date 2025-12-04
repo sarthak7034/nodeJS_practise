@@ -5,6 +5,7 @@
 - **Redis Caching**: Lightning-fast response times with intelligent caching strategy.
 - **Advanced Aggregations**: Industry-standard MongoDB pipelines for business analytics.
 - **Secure Authentication**: JWT-based auth with Refresh Token Rotation & Reuse Detection.
+- **File Uploads**: Robust image and document upload system with validation.
 - **CRUD Operations**: Create, Read, Update, and Delete users.
 - **Pagination**: Efficient offset-based pagination for fetching large datasets.
 - **Swagger Documentation**: Interactive API docs at `/api-docs`.
@@ -20,6 +21,16 @@
 - **Cache**: Redis
 - **Documentation**: Swagger (OpenAPI 3.0)
 - **Tools**: Nodemon (Dev), Morgan (Logger)
+
+## 📖 API Documentation (Swagger)
+
+The API documentation is available at `http://localhost:3000/api-docs`.
+
+**How to Authenticate in Swagger:**
+1. Click the **Authorize** button (top right).
+2. Enter your **Access Token** (from `/auth/login`).
+3. Click **Authorize**.
+4. Now all requests will include the token automatically! 🔓
 
 ## 📦 Installation & Setup
 
@@ -67,6 +78,8 @@
 | `POST` | `/auth/login` | Login & get tokens | No |
 | `POST` | `/auth/refresh` | Rotate Refresh Token | No |
 | `POST` | `/auth/logout` | Invalidate Refresh Token | No |
+| `POST` | `/files/upload/image` | Upload Image (JPG/PNG) | **Yes** |
+| `POST` | `/files/upload/doc` | Upload Document (PDF/DOC) | **Yes** |
 
 ### Users
 

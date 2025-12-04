@@ -18,11 +18,17 @@ app.use(express.json());
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 
 const authRoutes = require('./src/routes/authRoutes');
+const fileRoutes = require('./src/routes/fileRoutes');
+const path = require('path');
 
 // 4. API Routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/analytics', analyticsRoutes);
+app.use('/files', fileRoutes);
+
+// 5. Serve Static Files (Uploads)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 5. Start the Server (Only after DB connection)
 const { connectRedis } = require('./src/config/redis');
