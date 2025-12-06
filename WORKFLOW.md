@@ -251,37 +251,48 @@ connectRedis() is called from server.js
 
 ---
 
-## 🧵 Part 8: Queue & Worker Flow (Example: GET /analytics/heavy-task)
+## 🧵 Part 8: Queue & Worker Flow (RabbitMQ version)
 
 ```
 1. Client → GET http://localhost:3000/analytics/heavy-task?limit=1000000
    │
    └─> analyticsRoutes → analyticsController.getHeavyComputation()
        │
-       ├─> Line 325: Add job to Bull Queue
-       │   └── heavyTaskQueue.add({ limit })
+       ├─> Line 333: Call addJob()
+       │   └── src/config/queue.js
        │
-       ├─> Line 330: Return Job ID immediately (Non-blocking)
-       │   └── res.json({ jobId: 1, status: 'queued' })
+       ├─> Inside addJob():
+       │   ├── Generate UUID
+       │   ├── Save status to Redis: SET job:<uuid> { state: 'active' }
+       │   └── Send msg to RabbitMQ: "heavy-computation" queue
        │
-       └─> BACKGROUND PROCESSING (src/config/queue.js)
-           │
-           ├─> Queue Processor picks up job
-           │
-           ├─> Spawns Worker Thread (src/workers/heavyTaskWorker.js)
-           │
-           ├─> Worker calculates Primes
-           │
-           └─> Worker finishes → Queue marks job as 'completed'
+       └─> Line 338: Return Job ID immediately (Non-blocking)
+           └── res.json({ jobId, status: 'started' })
 
-2. Client → GET http://localhost:3000/analytics/task-status/1
+2. BACKGROUND PROCESSING (src/config/queue.js)
    │
-   └─> analyticsRoutes → analyticsController.getTaskStatus()
+   └─> startWorker() (Listening to RabbitMQ)
        │
-       └─> Check Queue for Job ID
+       ├─> Message Received! 📨
+       │
+       ├─> Line 67: Spawn Worker Thread
+       │   └── new Worker('./workers/heavyTaskWorker.js')
+       │
+       ├─> Worker Thread (Parallel CPU Core)
+       │   └── Calculates Primes 🔢
+       │
+       └─> Worker Finishes
+           ├── Update Redis: SET job:<uuid> { state: 'completed', result }
+           └── ACK RabbitMQ: Delete message from queue
+
+3. Client → GET http://localhost:3000/analytics/task-status/1
+   │
+   └─> analyticsController.getTaskStatus()
+       │
+       └─> READ Redis: GET job:<uuid>
            │
-           ├─> If active/waiting: Return "active"
-           └─> If completed: Return result (Prime count)
+           ├─> If state="active" → Return "Processing..."
+           └─> If state="completed" → Return Result
 ```
 
 ---
@@ -299,7 +310,9 @@ server.js (Root)
 │   └── redis (npm package)
 │
 ├── src/config/queue.js
-│   ├── bull (npm package)
+│   ├── amqplib (RabbitMQ client)
+│   ├── uuid (Job ID generation)
+│   ├── redisClient (State management)
 │   └── src/workers/heavyTaskWorker.js (Worker Thread)
 │
 ├── src/config/swagger.js
