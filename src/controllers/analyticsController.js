@@ -1,5 +1,6 @@
 const { getDb } = require('../config/db');
 const { client: redisClient } = require('../config/redis');
+const { addJob } = require('../config/queue');
 
 // 1. Sales Analytics - Revenue by Date Range
 const getSalesAnalytics = async (req, res) => {
@@ -319,21 +320,19 @@ const getMonthlyRevenue = async (req, res) => {
     }
 };
 
-const { heavyTaskQueue } = require('../config/queue');
-
 // ... existing imports ...
 
-// 6. Heavy Computation (Queue + Worker Threads)
+// 6. Heavy Computation (RabbitMQ + Worker Threads)
 const getHeavyComputation = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 100000;
         
-        // Add job to the queue
-        const job = await heavyTaskQueue.add({ limit });
+        // Add job to RabbitMQ
+        const job = await addJob({ limit });
         
         console.log(`[Main] Added job ${job.id} to queue`);
 
-        // Respond immediately (Async processing)
+        // Respond immediately
         res.json({
             message: "Task added to queue",
             jobId: job.id,
@@ -344,25 +343,25 @@ const getHeavyComputation = async (req, res) => {
     }
 };
 
-// 7. Check Task Status
+// 7. Check Task Status (From Redis)
 const getTaskStatus = async (req, res) => {
     try {
         const jobId = req.params.id;
-        const job = await heavyTaskQueue.getJob(jobId);
+        
+        // Fetch status from Redis
+        const jobData = await redisClient.get(`job:${jobId}`);
 
-        if (!job) {
-            return res.status(404).json({ error: "Job not found" });
+        if (!jobData) {
+            return res.status(404).json({ error: "Job not found or expired" });
         }
 
-        const state = await job.getState();
-        const result = job.returnvalue;
-        const reason = job.failedReason;
+        const status = JSON.parse(jobData);
 
         res.json({
             jobId,
-            state, // completed, failed, delayed, active, waiting
-            result,
-            error: reason
+            state: status.state,
+            result: status.result,
+            error: status.error
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

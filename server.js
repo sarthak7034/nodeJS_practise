@@ -32,10 +32,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 5. Start the Server (Only after DB connection)
 const { connectRedis } = require('./src/config/redis');
+const { connectQueue } = require('./src/config/queue');
 
 async function startServer() {
     await connectDB();
     await connectRedis();
+    await connectQueue(); // Connect to RabbitMQ
     
     app.listen(PORT, () => {
         console.log(`\n🚀 Server is running on http://localhost:${PORT}`);

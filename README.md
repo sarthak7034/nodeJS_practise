@@ -100,7 +100,7 @@ The API documentation is available at `http://localhost:3000/api-docs`.
 | `GET` | `/analytics/categories` | Revenue by category | `$lookup`, `$group`, category breakdown |
 | `GET` | `/analytics/user-patterns` | Customer Lifetime Value | `$addFields`, user spending analysis |
 | `GET` | `/analytics/monthly-revenue` | Monthly trends | `$year`, `$month`, time-based grouping |
-| `GET` | `/analytics/heavy-task` | Trigger CPU-intensive task | **Bull Queue** + **Worker Threads** |
+| `GET` | `/analytics/heavy-task` | Trigger CPU-intensive task | **RabbitMQ** + **Worker Threads** |
 | `GET` | `/analytics/task-status/:id` | Check background job status | Poll for async results |
 
 ## 📂 Project Structure
@@ -156,7 +156,8 @@ The API documentation is available at `http://localhost:3000/api-docs`.
     - Industry-standard data modeling and query optimization.
 - **v1.5.0**: Multi-threading & Job Queue
     - Implemented Worker Threads for CPU-intensive tasks (prime calculation).
-    - Integrated Bull (Redis-backed queue) for background job processing.
+    - **RabbitMQ Integration**: Replaced Bull with RabbitMQ for robust message queuing.
+    - **Redis State Management**: Used Redis to store job status and results.
     - Added job status tracking and result polling.
     - Queue concurrency set to 2 for optimal performance.
 - **v1.6.0**: JWT Authentication & Authorization
