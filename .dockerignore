@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+k8s
+Dockerfile
+README.md
+CODE_WALKTHROUGH.md
+ROADMAP.md
+WORKFLOW.md

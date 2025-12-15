@@ -21,6 +21,7 @@
 - **Cache**: Redis
 - **Documentation**: Swagger (OpenAPI 3.0)
 - **Tools**: Nodemon (Dev), Morgan (Logger)
+- **Infrastructure**: Docker, Kubernetes
 
 ## 📖 API Documentation (Swagger)
 
@@ -66,6 +67,19 @@ The API documentation is available at `http://localhost:3000/api-docs`.
 
     # Production mode
     npm start
+    ```
+
+6.  **Run with Kubernetes** (Recommended)
+    See the full [Walkthrough](walkthrough.md) for details.
+    ```bash
+    # 1. Build the image
+    docker build -t node-app .
+
+    # 2. Deploy to Cluster
+    kubectl apply -f k8s/
+
+    # 3. Access App
+    # Go to http://localhost:3000
     ```
 
 ## 📡 API Endpoints
@@ -168,3 +182,7 @@ The API documentation is available at `http://localhost:3000/api-docs`.
     - Role-based authorization (Admin vs User).
     - Protected all user CRUD endpoints with authentication.
     - Microservices-ready architecture.
+- **v1.7.0**: Kubernetes Implementation
+    - Containerized application with Docker.
+    - Added Kubernetes manifests for App, MongoDB, Redis, and RabbitMQ.
+    - Externalized configuration using Environment Variables.

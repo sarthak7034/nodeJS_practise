@@ -410,4 +410,47 @@ Cache Result / Return Job ID
 JSON Response → Client
 ```
 
-This architecture is scalable, maintainable, and follows industry best practices! 🚀
+
+---
+
+## 🏗️ Part 9: Deployment Workflow (Kubernetes)
+
+This is how the application runs in a production-like environment (Kubernetes).
+
+```
+1. Build Process
+   Dockerfile → docker build → Docker Image (node-app:latest)
+
+2. Deployment (kubectl apply -f k8s/)
+   │
+   ├─> Database & Services Start First
+   │   ├── MongoDB Pod (Port 27017)
+   │   ├── Redis Pod (Port 6379)
+   │   └── RabbitMQ Pod (Ports 5672/15672)
+   │
+   └─> Application Starts (node-app Deployment)
+       │
+       ├─> Kubernetes injects Environment Variables
+       │   ├── MONGO_URI from k8s Service DNS (mongodb)
+       │   ├── REDIS_URL from k8s Service DNS (redis)
+       │   └── RABBITMQ_URL from k8s Service DNS (rabbitmq)
+       │
+       └─> Application Connects
+           ├── Connects to mongodb:27017
+           ├── Connects to redis:6379
+           └── Connects to rabbitmq:5672
+
+3. Traffic Flow
+   User (localhost:3000)
+    ↓
+   Kubernetes Service (LoadBalancer/NodePort)
+    ↓
+   Node App Pod
+    ↓
+   Internal Cluster DNS (e.g., "mongodb")
+    ↓
+   Database Pod
+```
+
+This architecture allows the application to be scalable, self-healing, and easily managed.
+

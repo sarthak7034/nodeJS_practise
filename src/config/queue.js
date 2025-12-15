@@ -11,19 +11,19 @@ let channel;
 async function connectQueue(retries = 5) {
     while (retries) {
         try {
-            const connection = await amqp.connect('amqp://localhost');
+            const connection = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost');
             channel = await connection.createChannel();
             await channel.assertQueue(QUEUE_NAME, { durable: true });
-            
+
             // Set concurrency (prefetch) to 2
             channel.prefetch(2);
-            
+
             console.log('✅ Connected to RabbitMQ!');
-            
+
             // Start processing
             startWorker();
             return; // Success
-            
+
         } catch (error) {
             console.error(`❌ RabbitMQ Connection Error (Retries left: ${retries - 1}):`, error.message);
             retries -= 1;
@@ -64,7 +64,7 @@ async function addJob(data) {
 // 3. Process Jobs (Consumer)
 function startWorker() {
     console.log('[Queue] Waiting for messages...');
-    
+
     channel.consume(QUEUE_NAME, async (msg) => {
         if (!msg) return;
 
@@ -84,7 +84,7 @@ function startWorker() {
         worker.on('message', async (result) => {
             if (result.status === 'success') {
                 console.log(`[Queue] Job ${jobId} completed!`);
-                
+
                 // Update Redis with Result
                 await redisClient.setEx(`job:${jobId}`, 3600, JSON.stringify({
                     state: 'completed',
