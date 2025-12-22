@@ -454,3 +454,50 @@ This is how the application runs in a production-like environment (Kubernetes).
 
 This architecture allows the application to be scalable, self-healing, and easily managed.
 
+---
+
+## 📊 Part 10: Observability Workflow (Prometheus & Grafana)
+
+This is how metrics flow from your application to dashboards.
+
+```
+1. Application Exposes Metrics
+   server.js
+    │
+    ├─> prom-client library collects default metrics
+    │   (CPU, memory, event loop lag, etc.)
+    │
+    └─> GET /metrics endpoint returns Prometheus format
+        # HELP process_cpu_seconds_total Total CPU time
+        # TYPE process_cpu_seconds_total counter
+        process_cpu_seconds_total 0.234
+
+2. Prometheus Scrapes Metrics
+   prometheus-config.yaml defines scrape targets
+    │
+    ├─> Kubernetes Service Discovery
+    │   └── Finds pods with annotation: prometheus.io/scrape: "true"
+    │
+    └─> Every 15 seconds:
+        GET http://node-app-pod:3000/metrics
+        └── Stores time-series data
+
+3. Grafana Visualizes Data
+   User (localhost:3001)
+    │
+    └─> Grafana Dashboard
+        │
+        ├─> Queries Prometheus (http://prometheus:9090)
+        │   └── PromQL: rate(process_cpu_seconds_total[5m])
+        │
+        └─> Renders Charts & Alerts
+```
+
+### Key Files
+- `server.js`: Lines 17-25 expose `/metrics` endpoint
+- `k8s/monitoring/prometheus-config.yaml`: Scrape configuration
+- `k8s/monitoring/prometheus-deployment.yaml`: Prometheus server
+- `k8s/monitoring/grafana-deployment.yaml`: Grafana dashboard
+- `chart/node-app/templates/deployment.yaml`: Prometheus annotations
+
+This observability stack is industry-standard for monitoring microservices! 📈

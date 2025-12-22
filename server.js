@@ -14,6 +14,17 @@ const PORT = 3000;
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Prometheus Metrics Setup
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', client.register.contentType);
+    res.end(await client.register.metrics());
+});
+
+
 // 3. Swagger Documentation Route
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 

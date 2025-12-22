@@ -12,6 +12,9 @@
 - **Logging**: Request logging using `morgan`.
 - **Auto-Seeding**: Populates database with realistic e-commerce data (users, products, orders).
 - **Modular Architecture**: Clean separation of concerns (routes, controllers, config).
+- **Prometheus Metrics**: Application metrics exposed at `/metrics` for monitoring.
+- **Grafana Dashboards**: Pre-configured monitoring stack for visualization.
+- **Helm Chart**: Industry-standard Kubernetes packaging for easy deployment.
 
 ## 🛠️ Tech Stack
 
@@ -21,7 +24,8 @@
 - **Cache**: Redis
 - **Documentation**: Swagger (OpenAPI 3.0)
 - **Tools**: Nodemon (Dev), Morgan (Logger)
-- **Infrastructure**: Docker, Kubernetes
+- **Infrastructure**: Docker, Kubernetes, Helm
+- **Monitoring**: Prometheus, Grafana
 
 ## 📖 API Documentation (Swagger)
 
@@ -136,9 +140,25 @@ The API documentation is available at `http://localhost:3000/api-docs`.
 │   │   └── analyticsRoutes.js # Analytics endpoints
 │   └── workers/
 │       └── heavyTaskWorker.js # Worker thread script
+├── k8s/                    # Kubernetes manifests
+│   ├── app-deployment.yaml
+│   ├── mongo-deployment.yaml
+│   ├── redis-deployment.yaml
+│   ├── rabbitmq-deployment.yaml
+│   └── monitoring/         # Prometheus & Grafana
+│       ├── prometheus-config.yaml
+│       ├── prometheus-deployment.yaml
+│       └── grafana-deployment.yaml
+├── chart/                  # Helm Chart
+│   └── node-app/
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       └── templates/
 ├── server.js               # Main application entry point
+├── Dockerfile              # Container build instructions
 ├── package.json            # Dependencies and scripts
 ├── .gitignore              # Ignored files
+├── MONITORING_GUIDE.md     # Prometheus/Grafana setup guide
 └── README.md               # Project documentation
 ```
 
@@ -186,3 +206,9 @@ The API documentation is available at `http://localhost:3000/api-docs`.
     - Containerized application with Docker.
     - Added Kubernetes manifests for App, MongoDB, Redis, and RabbitMQ.
     - Externalized configuration using Environment Variables.
+- **v1.8.0**: Observability & Helm
+    - Added **Prometheus** metrics endpoint (`/metrics`) using `prom-client`.
+    - Deployed **Prometheus** server to scrape application metrics.
+    - Deployed **Grafana** for dashboards and visualization.
+    - Created **Helm Chart** (`chart/node-app/`) for templated deployments.
+    - Added `MONITORING_GUIDE.md` with setup instructions.
